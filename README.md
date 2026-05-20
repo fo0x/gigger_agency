@@ -42,7 +42,7 @@ Two third-party integrations — replace if you migrate them:
 
 | What | Where | Used for |
 |---|---|---|
-| **Tally** | `https://tally.so/r/A766ZB` | "Apply to join beta" CTAs (4 spots: nav, hero, pricing free plan, final CTA) |
+| **Tally** | `https://forms.thegigger.co` (Tally form on a custom domain) | "Apply to join beta" CTAs (4 spots: nav, hero, pricing free plan, final CTA) |
 | **Formsubmit** | `https://formsubmit.co/ajax/c516ad938c7220351528553761be148e` (alias for the project owner's inbox) | Lead-magnet form (playbook download) and Lifetime Pro modal — both POST here, submissions land in inbox |
 
 **One-time Formsubmit activation:** the first submission to a new email triggers an activation link sent to that address. Click it once and submissions start landing for real. After that, Formsubmit also gives you a random alias hash — replace the email in `index.html` with the hash if you want to keep your address out of the page source.
