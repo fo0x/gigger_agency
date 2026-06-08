@@ -1182,7 +1182,8 @@ section { padding: clamp(80px, 10vw, 160px) 0; }
   display: flex; flex-direction: column; gap: 10px;
 }
 .modal-form input[type="text"],
-.modal-form input[type="email"] {
+.modal-form input[type="email"],
+.modal-form input[type="url"] {
   background: #fff;
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -1861,42 +1862,28 @@ commission</div>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
     </button>
 
-    <!-- STEP 1: lightweight form -->
-    <div class="modal-state-form">
-      <div id="modal-apply-title" class="modal-title">Apply to join the beta.</div>
-      <p class="modal-body">A few quick details and you're in for review. Takes 30 seconds — full application after.</p>
-      <form class="modal-form apply-form" action="https://formsubmit.co/ajax/c516ad938c7220351528553761be148e" method="POST">
-        <input type="email" name="email" placeholder="Work email" required />
-        <input type="url" name="website" placeholder="Agency website (https://…)" required />
-        <select name="team_size" required>
-          <option value="" disabled selected>Team size</option>
-          <option value="1-10">1–10 people</option>
-          <option value="11-25">11–25 people</option>
-          <option value="26-50">26–50 people</option>
-          <option value="51-100">51–100 people</option>
-          <option value="100+">100+ people</option>
-        </select>
-        <input type="hidden" name="_subject" value="Beta application (step 1) — Gigger landing" />
-        <input type="hidden" name="_template" value="table" />
-        <input type="hidden" name="_captcha" value="false" />
-        <input type="text" name="_honey" tabindex="-1" autocomplete="off" style="display:none" />
-        <button type="submit">Continue
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-        </button>
-      </form>
-      <div class="modal-fineprint">Step 1 of 2 · No spam</div>
-    </div>
-
-    <!-- STEP 2: thank-you + Tally CTA -->
-    <div class="modal-state-done">
-      <div class="modal-title">One more step. Two minutes.</div>
-      <p class="modal-body">Thanks — we've got your details. Tell us a bit more about your agency so we can prioritise your application.</p>
-      <a class="modal-cta" href="https://forms.thegigger.co" target="_blank" rel="noopener">
-        Continue to full application
+    <div id="modal-apply-title" class="modal-title">Apply to join the beta.</div>
+    <p class="modal-body">A few quick details and you're in for review. Takes 30 seconds.</p>
+    <form class="modal-form apply-form" action="https://formsubmit.co/ajax/c516ad938c7220351528553761be148e" method="POST">
+      <input type="email" name="email" placeholder="Work email" required />
+      <input type="text" name="website" placeholder="Agency website" required />
+      <select name="team_size" required>
+        <option value="" disabled selected>Team size</option>
+        <option value="1-10">1–10 people</option>
+        <option value="11-25">11–25 people</option>
+        <option value="26-50">26–50 people</option>
+        <option value="51-100">51–100 people</option>
+        <option value="100+">100+ people</option>
+      </select>
+      <input type="hidden" name="_subject" value="Beta application (step 1) — Gigger landing" />
+      <input type="hidden" name="_template" value="table" />
+      <input type="hidden" name="_captcha" value="false" />
+      <input type="text" name="_honey" tabindex="-1" autocomplete="off" style="display:none" />
+      <button type="submit">Continue
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-      </a>
-      <div class="modal-fineprint">Opens in a new tab · ~2 min</div>
-    </div>
+      </button>
+    </form>
+    <div class="modal-fineprint">Opens full application next · No spam</div>
   </div>
 </div>
 
@@ -1921,8 +1908,6 @@ function closeModal(m) {
   document.body.classList.remove('modal-open');
 }
 function resetApplyModal(backdrop) {
-  const modal = backdrop.querySelector('.modal');
-  modal?.classList.remove('is-done');
   const form = backdrop.querySelector('.apply-form');
   if (!form) return;
   form.classList.remove('done');
@@ -1949,8 +1934,35 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// Form submission — lead magnet + modal forms
-document.querySelectorAll('.lm-form, .modal-form').forEach(form => {
+// Apply form: fire-and-forget submit + open Tally immediately so popup blocker doesn't trigger
+document.querySelectorAll('.apply-form').forEach(form => {
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (form.classList.contains('done')) return;
+    form.classList.add('done');
+    // Open Tally synchronously (preserves the trusted user gesture → no popup block)
+    window.open('https://forms.thegigger.co', '_blank', 'noopener,noreferrer');
+    // Background submit — keepalive lets it complete even if user navigates away
+    try {
+      fetch(form.action, {
+        method: 'POST',
+        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify(Object.fromEntries(new FormData(form))),
+        keepalive: true
+      }).catch(() => {});
+    } catch {}
+    // Reflect success briefly, then close
+    const button = form.querySelector('button[type="submit"]');
+    if (button) {
+      button.disabled = true;
+      button.innerHTML = 'Opening application ✓';
+    }
+    setTimeout(() => closeModal(form.closest('.modal-backdrop')), 900);
+  });
+});
+
+// Other forms (lead magnet + lifetime modal) — original submit-and-confirm flow
+document.querySelectorAll('.lm-form, .modal-form:not(.apply-form)').forEach(form => {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const button = form.querySelector('button[type="submit"]');
@@ -1966,14 +1978,9 @@ document.querySelectorAll('.lm-form, .modal-form').forEach(form => {
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.success !== 'false') {
         form.classList.add('done');
-        if (form.classList.contains('apply-form')) {
-          // Step 1 done → swap modal to step-2 (Tally CTA)
-          form.closest('.modal')?.classList.add('is-done');
-        } else if (form.classList.contains('modal-form')) {
-          button.innerHTML = "Got it ✓ I'll email you";
-        } else {
-          button.innerHTML = 'Sent ✓ Check your inbox';
-        }
+        button.innerHTML = form.classList.contains('modal-form')
+          ? "Got it ✓ I'll email you"
+          : 'Sent ✓ Check your inbox';
       } else {
         button.disabled = false;
         button.innerHTML = 'Try again';
