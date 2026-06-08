@@ -1214,6 +1214,42 @@ section { padding: clamp(80px, 10vw, 160px) 0; }
 }
 body.modal-open { overflow: hidden; }
 
+/* ======= MODAL: two-state (apply form) ======= */
+.modal-state-done { display: none; }
+.modal.is-done .modal-state-form { display: none; }
+.modal.is-done .modal-state-done { display: block; }
+
+.modal-form select {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font: 500 14px 'DM Sans';
+  color: var(--ink);
+  outline: none;
+  transition: border-color .15s;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B6860' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 38px;
+  cursor: pointer;
+}
+.modal-form select:focus { border-color: var(--accent); }
+.modal-form select:invalid { color: var(--muted); }
+
+.modal-cta {
+  margin-top: 8px;
+  background: var(--accent); color: #fff; border: 0;
+  border-radius: 999px; padding: 14px 18px;
+  font: 500 14px 'DM Sans'; text-decoration: none;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  transition: background .15s;
+  width: 100%; box-sizing: border-box;
+}
+.modal-cta:hover { background: var(--accent-hover); }
+
 </style>
 </head>
 <body>
@@ -1230,7 +1266,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </a>
     <div class="nav-links"></div>
     <div class="nav-right">
-      <a href="https://forms.thegigger.co" target="_blank" rel="noopener" class="nav-cta">Apply to join beta</a>
+      <a href="#" data-open="modal-apply" class="nav-cta">Apply to join beta</a>
     </div>
   </div>
 </nav>
@@ -1245,7 +1281,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="hero-sub">
           <p class="lede">Simplify and automate how your agency builds partnerships to grow. One shared workspace for partner pages, agreements, leads and commission — so every referral actually turns into revenue.</p>
           <div class="hero-cta-row">
-            <a class="btn" href="https://forms.thegigger.co" target="_blank" rel="noopener">Apply to join beta <svg class="arr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+            <a class="btn" href="#" data-open="modal-apply">Apply to join beta <svg class="arr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
             <div class="hero-trust">
               <svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="3" fill="#2E8B57"/></svg>
               Free to early users
@@ -1685,7 +1721,7 @@ commission</div>
           <li>CRM sync</li>
           <li>Unlimited partners &amp; leads</li>
         </ul>
-        <a class="plan-cta" href="https://forms.thegigger.co" target="_blank" rel="noopener">Apply to join beta
+        <a class="plan-cta" href="#" data-open="modal-apply">Apply to join beta
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
         </a>
       </div>
@@ -1763,7 +1799,7 @@ commission</div>
 <section class="final">
   <div class="wrap">
     <h2>Ready to turn your partnership channel into a real revenue line?</h2>
-    <a class="btn final-btn" href="https://forms.thegigger.co" target="_blank" rel="noopener">Apply to join beta
+    <a class="btn final-btn" href="#" data-open="modal-apply">Apply to join beta
       <svg class="arr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
     </a>
     <div class="final-trust">FREE DURING BETA · NO CREDIT CARD REQUIRED</div>
@@ -1818,20 +1854,84 @@ commission</div>
   </div>
 </div>
 
+<!-- ============== MODAL: APPLY (2-step) ============== -->
+<div class="modal-backdrop" id="modal-apply" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-apply-title">
+    <button class="modal-close" type="button" aria-label="Close">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+
+    <!-- STEP 1: lightweight form -->
+    <div class="modal-state-form">
+      <div id="modal-apply-title" class="modal-title">Apply to join the beta.</div>
+      <p class="modal-body">A few quick details and you're in for review. Takes 30 seconds — full application after.</p>
+      <form class="modal-form apply-form" action="https://formsubmit.co/ajax/c516ad938c7220351528553761be148e" method="POST">
+        <input type="email" name="email" placeholder="Work email" required />
+        <input type="url" name="website" placeholder="Agency website (https://…)" required />
+        <select name="team_size" required>
+          <option value="" disabled selected>Team size</option>
+          <option value="1-10">1–10 people</option>
+          <option value="11-25">11–25 people</option>
+          <option value="26-50">26–50 people</option>
+          <option value="51-100">51–100 people</option>
+          <option value="100+">100+ people</option>
+        </select>
+        <input type="hidden" name="_subject" value="Beta application (step 1) — Gigger landing" />
+        <input type="hidden" name="_template" value="table" />
+        <input type="hidden" name="_captcha" value="false" />
+        <input type="text" name="_honey" tabindex="-1" autocomplete="off" style="display:none" />
+        <button type="submit">Continue
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </button>
+      </form>
+      <div class="modal-fineprint">Step 1 of 2 · No spam</div>
+    </div>
+
+    <!-- STEP 2: thank-you + Tally CTA -->
+    <div class="modal-state-done">
+      <div class="modal-title">One more step. Two minutes.</div>
+      <p class="modal-body">Thanks — we've got your details. Tell us a bit more about your agency so we can prioritise your application.</p>
+      <a class="modal-cta" href="https://forms.thegigger.co" target="_blank" rel="noopener">
+        Continue to full application
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </a>
+      <div class="modal-fineprint">Opens in a new tab · ~2 min</div>
+    </div>
+  </div>
+</div>
+
 <script>
+// Cache the apply-form button's original markup so we can reset it after submit
+const applyBtnEl = document.querySelector('.apply-form button[type="submit"]');
+const APPLY_BTN_HTML = applyBtnEl ? applyBtnEl.innerHTML : '';
+
 // Modal open / close
 function openModal(id) {
   const m = document.getElementById(id);
   if (!m) return;
+  if (id === 'modal-apply') resetApplyModal(m);
   m.classList.add('open');
   m.setAttribute('aria-hidden', 'false');
   document.body.classList.add('modal-open');
-  m.querySelector('input:not([type=hidden])')?.focus();
+  m.querySelector('input:not([type=hidden]), select')?.focus();
 }
 function closeModal(m) {
   m.classList.remove('open');
   m.setAttribute('aria-hidden', 'true');
   document.body.classList.remove('modal-open');
+}
+function resetApplyModal(backdrop) {
+  const modal = backdrop.querySelector('.modal');
+  modal?.classList.remove('is-done');
+  const form = backdrop.querySelector('.apply-form');
+  if (!form) return;
+  form.classList.remove('done');
+  form.reset();
+  const btn = form.querySelector('button[type="submit"]');
+  if (btn) {
+    btn.disabled = false;
+    btn.innerHTML = APPLY_BTN_HTML;
+  }
 }
 document.querySelectorAll('[data-open]').forEach(el => {
   el.addEventListener('click', (e) => {
@@ -1849,7 +1949,7 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// Form submission — lead magnet + modal
+// Form submission — lead magnet + modal forms
 document.querySelectorAll('.lm-form, .modal-form').forEach(form => {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -1866,9 +1966,14 @@ document.querySelectorAll('.lm-form, .modal-form').forEach(form => {
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.success !== 'false') {
         form.classList.add('done');
-        button.innerHTML = form.classList.contains('modal-form')
-          ? "Got it ✓ I'll email you"
-          : 'Sent ✓ Check your inbox';
+        if (form.classList.contains('apply-form')) {
+          // Step 1 done → swap modal to step-2 (Tally CTA)
+          form.closest('.modal')?.classList.add('is-done');
+        } else if (form.classList.contains('modal-form')) {
+          button.innerHTML = "Got it ✓ I'll email you";
+        } else {
+          button.innerHTML = 'Sent ✓ Check your inbox';
+        }
       } else {
         button.disabled = false;
         button.innerHTML = 'Try again';
