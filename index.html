@@ -1941,7 +1941,7 @@ document.querySelectorAll('.apply-form').forEach(form => {
     if (form.classList.contains('done')) return;
     form.classList.add('done');
     // Open Tally synchronously (preserves the trusted user gesture → no popup block)
-    window.open('https://forms.thegigger.co', '_blank', 'noopener,noreferrer');
+    window.open('https://tally.so/r/A766ZB', '_blank', 'noopener,noreferrer');
     // Background submit — keepalive lets it complete even if user navigates away
     try {
       fetch(form.action, {
